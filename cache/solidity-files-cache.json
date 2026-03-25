@@ -2,11 +2,11 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/akshaya/rre/contracts/EventHandler.sol": {
-      "lastModificationDate": 1774377096432,
-      "contentHash": "f7f06b2c0a4a64a068816222547879b6",
+      "lastModificationDate": 1774441091431,
+      "contentHash": "db3f6cd91212e1eb30e653eddddbcf46",
       "sourceName": "contracts/EventHandler.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.20",
         "settings": {
           "evmVersion": "paris",
           "optimizer": {
@@ -40,11 +40,11 @@
       ]
     },
     "/home/akshaya/rre/contracts/ReactiveRewardEngine.sol": {
-      "lastModificationDate": 1774378029752,
-      "contentHash": "be9249ebeca2b3ac4d7fe305acb2201b",
+      "lastModificationDate": 1774440998561,
+      "contentHash": "d451a930aa1bb36c2ebce06da9e68e86",
       "sourceName": "contracts/ReactiveRewardEngine.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.20",
         "settings": {
           "evmVersion": "paris",
           "optimizer": {
@@ -72,6 +72,7 @@
         "^0.8.20"
       ],
       "artifacts": [
+        "ILeaderboardRegistry",
         "ReactiveRewardEngine"
       ]
     },
@@ -80,7 +81,7 @@
       "contentHash": "0a526cfa479625c5af8e4766b68ad66d",
       "sourceName": "contracts/LeaderboardRegistry.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.20",
         "settings": {
           "evmVersion": "paris",
           "optimizer": {
@@ -109,42 +110,6 @@
       ],
       "artifacts": [
         "LeaderboardRegistry"
-      ]
-    },
-    "/home/akshaya/rre/contracts/Lock.sol": {
-      "lastModificationDate": 1774377460624,
-      "contentHash": "5daa40c22d3a9841af8edcaaabc57c7c",
-      "sourceName": "contracts/Lock.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.28"
-      ],
-      "artifacts": [
-        "Lock"
       ]
     }
   }

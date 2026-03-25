@@ -94,12 +94,17 @@ export interface AppState {
   leaderboard: LeaderboardEntry[];
   activePipelineEvent: PipelineEvent | null;
 }
-
 export interface RuleFormData {
-  eventName: string;
-  condition: string;
-  actionType: ActionType;
-  rewardAmount: string;
-  badgeName: string;
-  badgeMetadata: string;
+  eventTrigger: string;
+  rewardType: 'token' | 'badge' | 'score';
+  rewardValue: string;
 }
+
+// export interface RuleFormData {
+//   eventName: string;
+//   condition: string;
+//   actionType: ActionType;
+//   rewardAmount: string;
+//   badgeName: string;
+//   badgeMetadata: string;
+// }

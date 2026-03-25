@@ -8,9 +8,9 @@ const config: HardhatUserConfig = {
   solidity: "0.8.20",
   networks: {
     "somnia-testnet": {
-      url: process.env.SOMNIA_TESTNET_RPC || "https://testnet-rpc.somnia.network",
+      url: process.env.SOMNIA_TESTNET_RPC || "https://dream-rpc.somnia.network/",
       accounts: [process.env.PRIVATE_KEY || ""],
-      chainId: 1001,
+      chainId: 50312,
     },
   },
 };

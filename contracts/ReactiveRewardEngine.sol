@@ -1,13 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
+// ============ Interfaces ============
+// We need this interface so the Engine knows how to talk to the Leaderboard
+interface ILeaderboardRegistry {
+    function awardAchievement(address _player, string memory _name, string memory _description) external returns (uint256);
+    function updateScore(address _player, uint256 _points) external;
+}
+
 /**
  * @title ReactiveRewardEngine
  * @dev Core protocol for push-based reactive rewards on Somnia Network
  * Users register rules: "When event X fires, trigger action Y"
  * Powered by Somnia Reactivity SDK (no keepers, no polling)
  */
-
 contract ReactiveRewardEngine {
     // ============ Types & Storage ============
     
@@ -32,7 +38,7 @@ contract ReactiveRewardEngine {
 
     struct Event {
         uint256 id;
-        address user;               // FIXED: Removed the illegal 'indexed' keyword here
+        address user;               
         string eventName;
         string metadata;            // Custom event data as JSON
         uint256 timestamp;
@@ -42,7 +48,8 @@ contract ReactiveRewardEngine {
     // ============ State ============
     
     address public admin;
-    address public eventHandler;    // FIXED: Moved this up so the compiler sees it early
+    address public eventHandler;    
+    address public leaderboardRegistry; // <-- Added this to fix the missing state variable!
     
     uint256 private _ruleCounter;
     uint256 private _eventCounter;
@@ -112,10 +119,6 @@ contract ReactiveRewardEngine {
     
     // ============ Rule Management ============
     
-    /**
-     * @dev Register a new reactive rule
-     * Example: When "SlayMonster" event fires, mint 50 tokens to user
-     */
     function registerRule(
         string memory _eventName,
         string memory _condition,
@@ -142,22 +145,10 @@ contract ReactiveRewardEngine {
             createdAt: block.timestamp
         });
         
-        emit RuleRegistered(
-            ruleId,
-            msg.sender,
-            _eventName,
-            _rewardAmount,
-            block.timestamp
-        );
-        
+        emit RuleRegistered(ruleId, msg.sender, _eventName, _rewardAmount, block.timestamp);
         return ruleId;
     }
     
-    /**
-     * @dev User/frontend emits a custom event
-     * Somnia Reactivity SDK listens for this on-chain
-     * EventHandler then automatically executes matching rules
-     */
     function emitCustomEvent(
         string memory _eventName,
         string memory _metadata
@@ -174,21 +165,11 @@ contract ReactiveRewardEngine {
             processed: false
         });
         
-        emit EventTriggered(
-            eventId,
-            msg.sender,
-            _eventName,
-            _metadata,
-            block.timestamp
-        );
+        emit EventTriggered(eventId, msg.sender, _eventName, _metadata, block.timestamp);
     }
     
-    // ============ Action Execution (Called by EventHandler) ============
+    // ============ Action Execution ============
     
-    /**
-     * @dev Execute a reward action (called by EventHandler after rule matches)
-     * This is where the actual reward logic happens
-     */
     function executeAction(
         address _user,
         uint256 _ruleId
@@ -208,49 +189,30 @@ contract ReactiveRewardEngine {
         }
     }
     
-    /**
-     * @dev Internal: Mint reward tokens to user
-     */
-    function _mintReward(
-        address _user,
-        uint256 _amount,
-        string memory _reason
-    ) internal {
+    function _mintReward(address _user, uint256 _amount, string memory _reason) internal {
         userRewardBalance[_user] += _amount;
-        
-        emit RewardMinted(
-            _user,
-            _amount,
-            _reason,
-            block.timestamp
-        );
+        emit RewardMinted(_user, _amount, _reason, block.timestamp);
     }
     
-    /**
-     * @dev Internal: Award achievement badge to user
-     */
-    function _awardBadge(
-        address _user,
-        uint256 _badgeId,
-        string memory _badgeName,
-        string memory _metadata
-    ) internal {
+    function _awardBadge(address _user, uint256 _badgeId, string memory _badgeName, string memory _metadata) internal {
         userAchievements[_user].push(_badgeId);
         
-        emit AchievementUnlocked(
-            _user,
-            _badgeId,
-            _badgeName,
-            block.timestamp
-        );
+        // Actually save to leaderboard on the blockchain
+        if (leaderboardRegistry != address(0)) {
+            ILeaderboardRegistry(leaderboardRegistry).awardAchievement(_user, _badgeName, _metadata);
+        }
+        
+        emit AchievementUnlocked(_user, _badgeId, _badgeName, block.timestamp);
     }
     
-    /**
-     * @dev Internal: Update user score on leaderboard
-     */
     function _updateScore(address _user, uint256 _deltaScore) internal {
-        // Delta is passed as points to add
-        // LeaderboardRegistry will handle actual rank updates
+        userRewardBalance[_user] += _deltaScore; 
+        
+        // Actually save to leaderboard on the blockchain
+        if (leaderboardRegistry != address(0)) {
+            ILeaderboardRegistry(leaderboardRegistry).updateScore(_user, _deltaScore);
+        }
+        
         emit ScoreUpdated(_user, userRewardBalance[_user], int256(_deltaScore), block.timestamp);
     }
     
@@ -295,5 +257,11 @@ contract ReactiveRewardEngine {
     function setEventHandler(address _handler) external onlyAdmin {
         require(_handler != address(0), "Invalid handler");
         eventHandler = _handler;
+    }
+
+    // <-- Added this to link the Leaderboard
+    function setLeaderboardRegistry(address _registry) external onlyAdmin {
+        require(_registry != address(0), "Invalid registry");
+        leaderboardRegistry = _registry;
     }
 }

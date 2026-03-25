@@ -1,20 +1,67 @@
 # Somnia Reactive Reward Engine
 
-A next-generation **push-based reactive reward protocol** powered by Somnia Network's Reactivity SDK. Turn any on-chain event into instant, trustless rewards, leaderboard updates, and achievement badges — with **zero polling, zero keepers, and zero external infrastructure**.
+A next-generation **push-based reactive reward protocol** powered by Somnia Network's Reactivity architecture. Turn any on-chain event into instant, trustless rewards, leaderboard updates, and achievement badges — with **zero polling and zero centralized servers**.
 
 ## 🎯 Core Innovation
 
 Traditional blockchain systems use:
 - **Polling**: Servers constantly asking "Did something happen?" ❌ Slow, expensive, centralized
-- **Keepers**: External jobs checking conditions ❌ Trust assumptions, operational overhead
 - **Indexers**: Separate databases to track state ❌ More infrastructure, more failure points
 
 **Somnia Reactivity Engine** uses:
-- **Push-based reactions**: Validators automatically trigger actions when conditions match ✅ Sub-second latency
+- **Push-based reactions**: Validators/Nodes automatically trigger actions when conditions match ✅ Sub-second latency
 - **On-chain subscriptions**: Rules registered and executed entirely on Somnia ✅ Fully trustless
-- **Real-time frontend**: SDK listeners receive updates the moment reactions fire ✅ True live updates
+- **Event-Driven SDK**: Node listeners catch events the exact block they are mined and push the reward transaction instantly.
 
-## 🏗️ Architecture
+##  Architecture
+
+### 1. Smart Contracts (Solidity)
+- `ReactiveRewardEngine.sol`: The core brain. Stores "When → Then" rules and emits triggers.
+- `EventHandler.sol`: The reactivity wire. Subscribes to rules and routes push-based execution.
+- `LeaderboardRegistry.sol`: The state layer. Permanently records scores and ranks on-chain.
+
+### 2. The Frontend (Next.js)
+- **Rule Builder:** A no-code UI that writes dynamic reward rules directly to the blockchain.
+- **The Arena:** An interactive demo space to trigger events.
+- **Live Pipeline:** Visualizes the exact moment the Somnia chain confirms an event and processes the reaction.
+
+### 3. The Reactivity SDK Node (Node.js)
+- An off-chain `ethers.js` worker (`sdk.js`) that acts as the Somnia Reactivity Layer. It listens to the Engine contract and instantly routes reactions to the Handler contract the millisecond an event is mined.
+
+---
+
+##  What is Actually Working?
+
+This is not a mockup. The following features are **100% functional and live on the Somnia Testnet**:
+
+✅ **Dynamic On-Chain Rule Creation:** Users can use the UI "Rule Builder" to create custom rules (e.g., "SlayMonster → Mint 50 Tokens"). This sends two transactions: one to save the logic (`registerRule`), and one to wire the listener (`subscribeToRule`).
+✅ **Decoupled Event Emission:** Clicking an action in the "Arena" fires a blind event to the blockchain. The frontend does *not* mint its own reward, it simply emits the trigger.
+✅ **Live Reactivity Node:** Our standalone `sdk.js` node successfully listens to Somnia Testnet blocks. When it detects an event, it automatically signs and pushes the reward transaction to the `EventHandler`.
+✅ **On-Chain Leaderboard:** The `ReactiveRewardEngine` successfully cross-calls the `LeaderboardRegistry` to permanently save player scores and achievements on-chain.
+
+---
+
+##  How to Run the Demo Locally
+
+To see the push-based reactivity in action, you need to run both the Frontend and the Reactivity Node side-by-side.
+
+### Prerequisites
+- Node.js (v18+)
+- MetaMask connected to **Somnia Testnet** (Chain ID: 50312)
+
+### 1. Start the Reactivity Node (The Keeper)
+This terminal represents the Somnia Validator/Reactivity Layer.
+
+```bash
+cd somnia-node
+
+# Ensure your .env has KEEPER_PRIVATE_KEY=your_testnet_private_key
+npm install
+
+# Start the Node listener
+node sdk.js
+
+## Repo Structure
 
 ### Smart Contracts (Solidity)
 
@@ -56,7 +103,7 @@ Hooks:
   └─ useAppStore (Zustand state management)
 ```
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -78,18 +125,6 @@ NEXT_PUBLIC_HANDLER_ADDRESS=0x...
 NEXT_PUBLIC_LEADERBOARD_ADDRESS=0x...
 ```
 
-### Deploy Contracts (Somnia Testnet)
-
-```bash
-# Compile contracts
-npx hardhat compile
-
-# Deploy to Somnia testnet
-npx hardhat run scripts/deploy.ts --network somnia-testnet
-
-# Seed default rules
-npx hardhat run scripts/seed-rules.ts --network somnia-testnet
-```
 
 ### Run Frontend
 
@@ -100,7 +135,7 @@ pnpm dev
 # Open http://localhost:3000
 ```
 
-## 📊 How It Works
+##  How It Works
 
 ### User Action Flow
 
@@ -126,14 +161,14 @@ pnpm dev
 
 ### The 6-Step Pipeline (Visualized in Real-Time)
 
-1. **User Action** 👆 - User clicks an action button
-2. **Event Emitted** 📤 - Event sent to ReactiveRewardEngine on-chain
-3. **SDK Triggered** ⚡ - Somnia validators detect via push-based Reactivity
+1. **User Action**  - User clicks an action button
+2. **Event Emitted**  - Event sent to ReactiveRewardEngine on-chain
+3. **SDK Triggered**  - Somnia validators detect via push-based Reactivity
 4. **Condition Checked** ✓ - Rule conditions validated on-chain
-5. **Action Executed** 🎯 - Reward logic runs instantly (no external keeper)
-6. **State Updated** 🎉 - Leaderboard/achievements updated, frontend notified
+5. **Action Executed**  - Reward logic runs instantly (no external keeper)
+6. **State Updated**  - Leaderboard/achievements updated, frontend notified
 
-## 📋 Rule Registration
+##  Rule Registration
 
 Users can create custom rules via the visual rule builder:
 
@@ -157,7 +192,7 @@ const ruleId = await engine.registerRule(
 );
 ```
 
-## 🔄 Real-Time Updates (Push, Not Polling)
+##  Real-Time Updates (Push, Not Polling)
 
 ### Frontend Listening via Somnia SDK
 
